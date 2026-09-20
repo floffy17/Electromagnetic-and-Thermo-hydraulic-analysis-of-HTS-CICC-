@@ -1,0 +1,673 @@
+=========================================================
+ SC PROJECT NELAHTP 2025/2026 - main
+=========================================================
+
+
+########## STEP 1 - DATA ACQUISITION ##########
+
+============================================================
+ PART 0 - DATA ACQUISITION REPORT
+ Faraday Factory HERMES - HTS Tape for Magnets, Data Book, version July 2025
+ generated 2026-09-08 19:22:15
+============================================================
+
+--- OPERATIONAL (brief) ---
+  I_rated      = 5e+04            [A   ] brief       Rated current (50 kA)
+  dIdt         = 200              [A/s ] brief       Ramp rate 0.2 kA/s
+  t_ramp       = 250              [s   ] brief       0->50 kA ramp duration (=250 s)
+  B_target     = 15               [T   ] brief       Max field on conductor incl. self-field
+  dT_margin    = 5                [K   ] brief       Required temperature margin (>= 5 K)
+  ID_wind      = 1                [m   ] brief       Solenoid inner diameter
+  H_max        = 1.5              [m   ] brief       Max solenoid height
+  mdot_max     = 0.015            [kg/s] brief       Max He mass flow rate (15 g/s)
+  Tin_range    = [4.5  50]        [K   ] brief       Inlet temperature envelope
+  pin_range    = [5 20]           [bar ] brief       Inlet pressure envelope
+
+--- TAPE - basic/architecture ---
+  width        = 0.004            [m   ] faraday     Tape width 4.0 +/- 0.2 mm
+  width_tol    = 0.0002           [m   ] faraday     Width tolerance
+  len_range    = [100 700]        [m   ] faraday     Tape length 100...700 m
+  Ic77_avg     = [100 200]        [A   ] faraday     Average Ic @ 77K, self-field, 4mm
+  eps_crit     = 0.004            [-   ] faraday     Critical deformation >= 0.4 %
+  dbend_crit   = 0.01             [m   ] faraday     Critical double-bend diameter <= 10 mm
+  sigma_uts    = 5e+08            [Pa  ] faraday     Strength > 500 MPa
+  t_substr     = 4e-05            [m   ] faraday     Hastelloy C-276 substrate 35...45 um (nominal 40)
+  t_Ag_side    = 1e-06            [m   ] faraday     Silver stabilization 1 um back / (2 um surround per architecture)
+  t_Cu_side    = 5e-06            [m   ] faraday     Copper stabilization 5 um each side
+  layers       = (struct)         [m   ] faraday     Layer stack; REBCO is YBCO+Y2O3-np (PLD) -> Tc ~ 92-93 K
+  t_total      = 5.56e-05         [m   ] faraday     Total nominal tape thickness (sum of architecture layers)
+  t_REBCO      = 2.5e-06          [m   ] faraday     Superconducting (YBCO) layer thickness
+  rho_20C      = 0.324            [Ohm/m] faraday     Room-T resistivity 324 +/- 14 mOhm/m (886 samples)
+
+--- DESIGN BASIS (assumptions/open) ---
+  Ic_ref77     = 100              [A   ] OPEN        Reference min Ic(77K,sf) anchoring the LF table. Proxy = low end of the average range; true min not in datasheet. ASSUMPTION-2 / awaiting Faraday.  <<< OPEN
+  E0           = 0.0001           [V/m ] faraday     Criterio Ic = 1 uV/cm = 1e-4 V/m. Confermato per iscritto dal fornitore (email Faraday Factory) e coerente col dataset (Vc=0.5uV/5mm).
+  n_T          = [15   20   25   30   40   50   60   70 77.5] [K   ] faraday-ds  Temperature della tabella n(T,B)
+  n_B          = [0 0.5   1   2   3   5   7   8] [T   ] faraday-ds  Campi della tabella n(T,B)
+  n_tab        = 5332222223086787........958192564222222218544232.... ...3221 3623222212133110909........625697872211121190999077........427932682111111168888876........434222222111111157766542........45799756211111195665420... ....797 6137 2111185454320........28887624   21175321420.. .....87 25653      [-   ] faraday-ds  n(B,T) all'angolo di Ic minimo; righe=B, colonne=T
+  n            = 25               [-   ] faraday-ds  n al punto di progetto (~15 T, 10 K), estrapolato dalla tabella del dataset Faraday. Prima era 20 da letteratura.
+  n_sweep      = [20 30]          [-   ] faraday-ds  Sweep di sensibilita' su n, coerente con la dispersione misurata ad alto campo.
+  n_lab77      = 16.9             [-   ] lab         n @ Ic misurato in laboratorio a 76.9 K campo proprio, per L_tap = 1 cm ASSUNTA (non dichiarata nei file). Sigma del fit 0.8. Confronto col dataset alle stesse condizioni: 24.4, cioe' -31%. Provino degradato (Ic ~1.9 A contro ~150 A nominali, Tc ~86 K contro ~92 K). CONTROLLO.
+  n_lab77_B    = 11.3             [-   ] lab         n @ Ic in laboratorio con campo applicato (valore di B non registrato). Il rapporto rispetto al campo proprio vale 0.68 +/- 0.03 per OGNI L_tap assunta: che n cali col campo e' quindi un risultato solido della misura, indipendente dalla metadata mancante.
+  n_lab_Ltap   = 0.01             [m   ] assumed     Distanza fra i tap di tensione assunta per interpretare le misure di laboratorio. NON dichiarata nei file: da recuperare dal quaderno di laboratorio o rimisurare sul provino. Sposta n fra 10.4 e 18.1.  (assumed)
+  Tc           = 92               [K   ] literature  YBCO Tc ~ 92 K (datasheet REBCO = YBCO+Y2O3-np). ASSUMPTION-1; may be released as fit param.
+  angleConv    = theta_Freschi = angleFaraday - 90 deg [-   ] assumed     Faraday angle measured from c-axis (0/180 deg = B perp tape). LF *table* is min over angle (worst-case), so no extra angle assumption needed for the table.  (assumed)
+
+--- JOINTS ---
+  R_avg        = 8.9e-09          [Ohm ] faraday     Lap joint (PbSn), avg resistance, 75 mm x 4 mm
+  R_area       = 2.67e-08         [Ohm*cm2] faraday     Area-normalised joint resistance (avg)
+  overlap      = 0.075            [m   ] faraday     Lap-joint overlap length
+
+--- MECHANICAL ---
+  delam_avg    = 7.1e+07          [Pa  ] faraday     Delamination strength avg ~71 MPa (Weibull dist.)
+
+-- Ic evaluator built: Ic.eval(T,B), Ic.Tcs(Itape,B), Ic.LF(B,T)
+
+--- SANITY CHECKS ---
+  [PASS] LF(0 T, 77.3 K) = 1.000 (expect 1.000)
+  [PASS] LF monotone decreasing in T (all rows, NaN-aware)
+  [PASS] LF monotone decreasing in B for B>=1 T (all T, NaN-aware)
+  [PASS] design point (15 T, 4.5 K) inside LF grid (no extrapolation)
+       Ic(4.5 K, 15 T) =  237.2 A   (LF=2.37 x Iref=100 A)
+       Ic(20.0 K, 15 T) =  134.9 A   (LF=1.35 x Iref=100 A)
+       Ic(50.0 K,  8 T) =   53.0 A   (LF=0.53 x Iref=100 A)  [50 K has no data at 15 T]
+  [PASS] Tcs round-trip @ 8 T: Itape=168.1 A -> Tcs=23.22 K (residual 9.7e-07)
+  [INFO] Tcs(B=15 T, Itape=67.5 A) = 20.0 K -> capped at the hottest MEASURED T for 15 T (20 K), see warning above.
+
+  NOTE: Ic_ref77 (=100 A) is still OPEN - see openItems(data).
+  E0 chiuso dal fornitore; n dalla tabella del dataset, con la misura di
+  laboratorio (16.9 a 76.9 K sf) come controllo indipendente.
+
+=== PART 0 - VOCI DA GIUSTIFICARE (OPEN / assumed / dataset fornitore) ===
+field                  tag       value          unit     note
+---------------------------------------------------------------------------------------------------------
+basis.Ic_ref77         OPEN      100            A        Reference min Ic(77K,sf) anchoring the LF table. Proxy = low end of the average range; true min not in datasheet. ASSUMPTION-2 / awaiting Faraday.
+basis.n                FARADAY-DS 25             -        n al punto di progetto (~15 T, 10 K), estrapolato dalla tabella del dataset Faraday. Prima era 20 da letteratura.
+basis.n_sweep          FARADAY-DS [20 30]        -        Sweep di sensibilita' su n, coerente con la dispersione misurata ad alto campo.
+basis.n_lab77          LAB       16.9           -        n @ Ic misurato in laboratorio a 76.9 K campo proprio, per L_tap = 1 cm ASSUNTA (non dichiarata nei file). Sigma del fit 0.8. Confronto col dataset alle stesse condizioni: 24.4, cioe' -31%. Provino degradato (Ic ~1.9 A contro ~150 A nominali, Tc ~86 K contro ~92 K). CONTROLLO.
+basis.n_lab77_B        LAB       11.3           -        n @ Ic in laboratorio con campo applicato (valore di B non registrato). Il rapporto rispetto al campo proprio vale 0.68 +/- 0.03 per OGNI L_tap assunta: che n cali col campo e' quindi un risultato solido della misura, indipendente dalla metadata mancante.
+basis.n_lab_Ltap       ASSUMED   0.01           m        Distanza fra i tap di tensione assunta per interpretare le misure di laboratorio. NON dichiarata nei file: da recuperare dal quaderno di laboratorio o rimisurare sul provino. Sposta n fra 10.4 e 18.1.
+basis.angleConv        ASSUMED   theta_Freschi = angleFaraday - 90 deg -        Faraday angle measured from c-axis (0/180 deg = B perp tape). LF *table* is min over angle (worst-case), so no extra angle assumption needed for the table.
+lfx.USED_FOR_DESIGN    FARADAY-DS false          -        FALSE: le tabelle lfx sono di sola validazione. La base di progetto per Ic(T,B) e' il Data Book (data.lf).
+lfx.ref_Acm            FARADAY-DS 508            A/cm     Ic(77.5K, 0T) del campione del dataset: riferimento di normalizzazione dei LF (dall'email).
+lfx.spread             FARADAY-DS [0.15  0.2]    -        Deviazione standard tipica dei lift factor da campione a campione (dall'email). Usare come banda di incertezza sul progetto.
+lfx.angPeak_shift      FARADAY-DS [-14.5  -2.5]  deg      Intervallo misurato dello shift del picco di Ic rispetto a 90 deg (T-B dipendente, dall'email + dataset).
+
+--- Stato delle voci chiave ---
+  * basis.Ic_ref77 : ANCORA APERTO -> proxy 100 A.
+                     Il metodo indicato dal fornitore e' Ic = Ic_spec(77K,sf) * LF:
+                     serve quindi l'Ic(77K,sf) DEL NOSTRO nastro, non del campione
+                     del dataset. Il Data Book da' solo il range 100-200 A.
+  * basis.E0       : CHIUSO -> 1 uV/cm confermato per iscritto dal fornitore.
+  * basis.n        : dal dataset del fornitore (campione rappresentativo del
+                     nostro stesso nastro). n NON e' costante: varia con T e B
+                     (tabella in basis.n_tab). Valore di progetto 25, sweep [20 30].
+  * basis.n_lab77  : CONTROLLO indipendente -> n = 16.9 misurato in laboratorio
+                     a 76.9 K campo proprio, contro 24.4 del dataset alle stesse
+                     condizioni (scarto -31%). Lo scarto e' coerente col provino
+                     degradato (Ic ~1.9 A, Tc ~86 K), non e' un errore di analisi.
+                     ATTENZIONE: dipende da basis.n_lab_Ltap, ASSUNTA a 1 cm
+                     perche' non dichiarata nei file di misura. Da recuperare.
+  * lfx.spread     : DISPERSIONE DA DICHIARARE -> il fornitore indica 15-20%
+                     di deviazione standard sui lift factor da campione a campione.
+                     Va portata nel margine: con LF al -15% il margine si riduce.
+  * lfx.LFmin      : copertura fino a 8 T e giu' fino a 15 K. Il punto di
+                     progetto (~15 T) e' OLTRE: per l'alto campo resta il Data Book.
+
+--- Parametri operativi estratti ---
+  I_nom = 50 kA | R_in = 0.500 m | H_max = 1.50 m | B_target = 15.0 T
+  rampa: 200 A/s -> t_ramp = 250 s (usata da Step 4, 6 e 7)
+
+
+########## STEP 2 - GEOMETRY DESIGN ##########
+
+--- 2.1b Geometria derivata dello stack ---
+  sezione stack = 4.00 x 4.45 mm = 17.79 mm^2
+  r0 (dimensione) = 2.380 mm | R_core (posizione) = 7.28 mm | r_near = 5.05 mm
+  distanza tra strand adiacenti = 7.276 mm -> r0/sep = 0.327
+
+--- 2.1c Risoluzione del twist nella mesh ---
+  mesh DAE  : 4.0 segmenti per periodo di twist
+  mesh campo: 5.3 segmenti per periodo di twist
+  NOTA: 4.0 seg/twist sono sufficienti (scarto DAE atteso ~2%).
+        Con disc.N_seg_dae = 48 si scenderebbe sotto 1% (costo di L x4).
+
+--- 2.2 Impilamento assiale (N_layer fissato da H_max) ---
+  H_max = 1.50 m, spessore DP = 50 mm -> N_layer = 29 (dispari, DERIVATO)
+  riempimento assiale = 96.7% di H_max
+  DP centrale: indice 15, z = 0.0000 m (deve essere 0)
+  estensione assiale occupata = 1.450 m (<= 1.50 m)
+
+--- 2.3 Dimensionamento di N_turn sul target B_pk = 15.0 T ---
+   N_turn =  3  ->  B_pk =   7.02 T  (scarto dal target -53.17 %)  [0.4 s]
+   N_turn =  4  ->  B_pk =   9.07 T  (scarto dal target -39.52 %)  [0.5 s]
+   N_turn =  5  ->  B_pk =  11.10 T  (scarto dal target -26.01 %)  [0.5 s]
+   N_turn =  6  ->  B_pk =  13.10 T  (scarto dal target -12.66 %)  [0.4 s]
+   N_turn =  7  ->  B_pk =  15.07 T  (scarto dal target  +0.50 %)  [0.5 s]
+   N_turn =  8  ->  B_pk =  17.02 T  (scarto dal target +13.47 %)  [0.5 s]
+   N_turn =  9  ->  B_pk =  18.94 T  (scarto dal target +26.25 %)  [0.5 s]
+  --> SCELTO N_turn = 7  (B_pk = 15.07 T, scarto +0.50 % dal target)
+      alternativa sotto: N_turn = 6 -> 13.10 T (-12.66 %)
+      alternativa sopra: N_turn = 8 -> 17.02 T (+13.47 %)
+      NOTA: B_pk e' +0.50 % SOPRA il target -> consuma margine di
+            temperatura. Tracciato fino allo Step 7 (portata minima).
+  twist: 6 giri interi/turn -> l_p = 0.524 m (turn interno) ... 0.707 m (esterno)
+  ampere-turn totali = 2.030e+07 A
+
+--- 2.4 Matrici P ed E definitive ---
+  P_macro: 12572 nodi | E_macro: 12544 segmenti  (28 layer attivi)
+  P_micro:  2694 nodi | E_micro:  2688 segmenti  (6 strand)
+  linea centrale: 449 nodi | facce BC: 6 iniezione, 6 estrazione
+  corrente per strand (equiripartizione) = 8333.3 A
+
+--- 2.5 Visualizzazione geometrica 3D ---
+  FIG 1: geometria MACRO (29 DP, vista 3D + spaccato + proiezione r-z)
+  FIG 2: geometria MICRO (6 strand twistati, 3D + zoom + sezioni)
+
+
+########## STEP 3 - CAMPO MAGNETICO ##########
+
+--- 3.1 Decomposizione del campo ---
+  B_ext  (background dagli altri 28 DP) : max =  12.00 T
+  B_mut  (dagli altri 5 strand del DP)  : max =   2.50 T
+  B_self (proprio strand, analitico)    :         0.70 T
+  B_TOT  sul conduttore                 : max =  15.07 T  (target 15.0 T)
+  picco in r = 0.4928 m (R_in = 0.500 m), z = -0.0125 m
+
+--- 3.2 Distribuzione spaziale ---
+  orientamento stack: 'radial'
+  B_perp: max = 13.65 T | B_par: max = 14.37 T | theta: 0.1 ... 89.8 deg
+  profilo radiale (B_max per turn):
+    turn  1 (r = 0.514 m): 14.93 T
+    turn  2 (r = 0.538 m): 12.79 T
+    turn  3 (r = 0.563 m): 10.46 T
+    turn  4 (r = 0.588 m):  8.11 T
+    turn  5 (r = 0.613 m):  5.76 T
+    turn  6 (r = 0.638 m):  3.42 T
+    turn  7 (r = 0.662 m):  2.68 T
+
+--- 3.3 Temperatura di current sharing e margine ---
+  T_cs: 1352 nodi su 2694 CERTIFICATI (radice dentro i dati), 1342 limiti inferiori
+  a B_pk = 15.07 T il Data Book misura solo T = 4.2 ... 20.0 K
+  nastri/slot = 80 -> stack 4.45 mm, r_near = 5.05 mm (corr B_mut +44.0%)
+  corrente per nastro I_tape = 104.2 A  (I_slot = 8333 A / 80 nastri)
+  punto CRITICO (Tcs minima certificata): r = 0.5852 m, z = -0.0106 m, B_near = 7.96 T
+
+  [LOOP B] T_op IMPOSTA dall'esterno a 16.46 K (derivata sarebbe 25.11 K)
+  Le perdite di isteresi useranno Ic a questa temperatura: essendo
+  piu' alta, Ic e' piu' bassa e la magnetizzazione SCENDE.
+
+  --- T_op IMPOSTO (Loop B), margine nello scenario peggiore (-20%) ---
+  T_cs nello scenario peggiore = 30.11 K [certified]
+  --> T_op_guess = 16.46 K (IMPOSTO: NON e' detto che rispetti 5 K di margine)
+  Ic del nastro a (T_op=16.46 K, B_pk) = 153.0 A -> I_tape/Ic = 0.681
+  T_cs = 35.98 K | T_op = 16.46 K -> MARGINE MINIMO = 19.52 K (richiesto >= 5 K)
+  [confronto: al centroide T_cs = 20.00 K, margine 3.54 K -> ottimistico]
+
+  --- Robustezza alla dispersione dei lift factor ---
+    LF x 1.00 -> T_cs = 35.98 K, margine = 19.52 K  [OK]
+    LF x 0.85 -> T_cs = 31.70 K, margine = 15.24 K  [OK]
+    LF x 0.80 -> T_cs = 30.11 K, margine = 13.65 K  [OK]
+  --> MARGINE RISPETTATO e CERTIFICATO dai dati misurati
+
+--- 3.3b Profilo della corrente critica lungo il DP ---
+  Ic per NASTRO a T_op = 16.46 K: 146.8 ... 472.7 A (escursione 3.2x)
+    minimo a s =  26.00 m, r = 0.4946 m, B_near = 16.16 T
+    massimo a s =   0.40 m, r = 0.6660 m, B_near =  2.07 T
+  Ic per STRAND (x80 nastri): 11743 ... 37814 A   contro I_slot = 8333 A
+  frazione di Ic usata, I_tape/Ic: 0.220 ... 0.710
+  profilo per turn (valori piu' sfavorevoli del giro):
+    turn     r [m] B_max [T] Ic [A/nastro]   I_tape/Ic   T_cs [K]
+       1     0.514     14.93        147.0       0.709      20.00
+       2     0.538     12.79        158.3       0.658      20.00
+       3     0.563     10.46        170.5       0.611      20.00
+       4     0.588      8.11        193.3       0.539      20.00
+       5     0.613      5.76        218.3       0.477      36.14
+       6     0.638      3.42        260.3       0.400      41.13
+       7     0.662      2.68        312.0       0.334      44.62
+  il nodo critico del margine (nodo 556, s = 13.17 m) ha Ic = 217.3 A/nastro
+    turn con Ic minima e turn con T_cs minima coincidono (turn 1)
+
+
+########## STEP 4 - SISTEMA DAE ##########
+
+--- 4.1 Mesh DAE ---
+  2022 nodi, 2016 archi (mesh campo: 2688 archi)
+
+--- 4.2 Matrice induttanze L ---
+  r0 = 2.380 mm (sezione stack 17.79 mm^2) | sep strand = 7.276 mm
+  calcolo L (Neumann, integral2)... puo' richiedere minuti
+  L: 2016x2016, 31.0 MB, 684.9 s
+  flusso concatenato per strand [uWb/A]: 2226.736 2226.625 2226.539 2226.562 2226.537 2226.625 
+  dispersione induttiva tra strand: 0.009 %  -> strand equivalenti: attesa equiripartizione
+  autovalori di L (campione): min = 6.420e-08, max = 8.921e-07
+
+--- 4.3 Assemblaggio del sistema ---
+
+--- 4.3b Esponente n della power law ---
+  n(T,B) dalla tabella del dataset del fornitore, valutato arco per arco
+  a T_op = 16.46 K: n = 25.8 ... 30.5 (media 26.5)
+  valore sintetico al punto di progetto (data.basis.n) = 25
+  controllo di laboratorio: n = 16.9 a 76.9 K campo proprio (vedi openItems)
+  NOTA: B arriva a 15.1 T ma la tabella si ferma a 8 T -> oltre il bordo
+        l'evaluatore CLAMPA. Alle basse T n si appiattisce ad alto campo,
+        quindi il clamp e' stabile, ma resta un'estrapolazione dichiarata.
+  E0 = 1.0e-04 V/m | n = 25.8-30.5 (tabella) | T_op = 16.5 K
+  Ic strand: min = 12249 A, max = 58623 A | I_slot/Ic_min = 0.680
+  sensibilita' a n (I/Ic = 0.680, lunghezza strand 51.7 m):
+    n =  20.0 -> tensione resistiva sul DP = 2.33e-06 V
+    n =  26.5 -> tensione resistiva sul DP = 1.90e-07 V
+    n =  30.0 -> tensione resistiva sul DP = 4.95e-08 V
+Warning: La tensione resistiva non e'
+trascurabile (2.33e-06 V) al n piu'
+basso della banda: qui la scelta di n
+conta e l'estrapolazione a 15 T va
+sostituita con una misura a campo
+pieno. 
+> In main_sc_project_gandalf_ridotto_examgrid_logconv_dense_fix (line 1018) 
+
+  Somma di R lungo ciascuno strand [nOhm]: 260.2240 260.2670 260.5646 260.1743 260.2356 260.5009 
+  dispersione tra strand: 0.1499 %  -> gli strand sono ELETTRICAMENTE EQUIVALENTI
+     (e' questa la ragione fisica dell'equiripartizione)
+
+--- 4.4 Integrazione temporale ---
+  rampa 0 -> 50 kA in 250 s, dt = 10.0 s (25 passi)
+  numero di condizione stimato (cond1est) = 2.15e+09
+    avanzamento  12%  (   3/25 passi,   14.3 s trascorsi, ~104.7 s residui)
+    avanzamento  20%  (   5/25 passi,   23.5 s trascorsi, ~ 94.1 s residui)
+    avanzamento  32%  (   8/25 passi,   37.7 s trascorsi, ~ 80.1 s residui)
+    avanzamento  40%  (  10/25 passi,   47.3 s trascorsi, ~ 70.9 s residui)
+    avanzamento  52%  (  13/25 passi,   61.3 s trascorsi, ~ 56.6 s residui)
+    avanzamento  60%  (  15/25 passi,   70.9 s trascorsi, ~ 47.3 s residui)
+    avanzamento  72%  (  18/25 passi,   84.9 s trascorsi, ~ 33.0 s residui)
+    avanzamento  80%  (  20/25 passi,   94.1 s trascorsi, ~ 23.5 s residui)
+    avanzamento  92%  (  23/25 passi,  134.6 s trascorsi, ~ 11.7 s residui)
+    avanzamento 100%  (  25/25 passi,  195.2 s trascorsi, ~  0.0 s residui)
+  25 passi in 195.2 s (7.808 s/passo) | 5.0 iterazioni di Picard per passo
+
+--- 4.5 Dimostrazione dell'equiripartizione ---
+  correnti finali per strand [A]: 8279.1 8334.9 8359.7 8331.0 8360.6 8334.8 
+  atteso I_nom/N_slots           : 8333.3 A
+  scarto massimo                 : 0.6509 %
+  somma delle correnti = 50000.0 A (imposta: 50000.0 A, errore 4.366e-16)
+  residuo sulle righe libere ||Ax-b||/||b|| = 1.513e-14  (cond stimato 2.15e+09)
+  vincoli: |V| max sulle facce di iniezione = 0.00e+00 V | dispersione su
+    quelle di estrazione = 0.00e+00 V (devono essere ~0)
+  variazione della corrente LUNGO ciascuno strand: max 0.00e+00 %
+  dispersione induttiva prevista in 4.2: 0.009 % (confronto con lo scarto)
+
+  ==> EQUIRIPARTIZIONE DIMOSTRATA
+      Il DAE e' stato risolto senza imporre la ripartizione: le correnti
+      risultano uguali perche' il twist commensurato rende gli strand
+      elettricamente equivalenti (stessa somma di R, vedi 4.3).
+
+--- 4.6 Controprova (strand resi NON equivalenti) ---
+  correnti con strand perturbati [A]: 0.0 0.0 0.1 0.3 24999.8 24999.8 
+  scarto: 200.00 %  (nel caso commensurato era 0.6509 %)
+  ==> Il modello DISTINGUE i due casi: la verifica di 4.5 e' significativa.
+
+
+--> Salvato sc_project_results.mat
+
+=========================================================
+ RIEPILOGO DEL DESIGN
+=========================================================
+  Solenoide : 29 DP x 7 turn radiali, R_in = 0.50 m, H = 1.45 m
+  Cavo      : 6 slot, 80 nastri/slot, twist 6 giri/turn
+  Correnti  : 50 kA totali -> 8333 A/slot -> 104.2 A/nastro
+  Campo     : B_pk = 15.07 T (target 15.0 T)
+  Margine   : T_cs = 35.98 K (CERTIFICATA dai dati), T_op = 16.5 K -> 19.52 K (richiesto 5 K)
+              nodi con T_cs certificata: 1352/2694
+  DAE       : scarto dall'equiripartizione = 6.51e-01 %
+---------------------------------------------------------
+  n dalla tabella n(T,B) dello Step 1, valutata arco per arco (4.3b).
+=========================================================
+
+
+########## STEP 5 - CICC LAYOUT ##########
+
+--- 5.2 Sezione trasversale e centroide ---
+  r_cavo            = 12.50 mm
+  jacket SS    2.00 -> r_former_out = 10.50 mm
+  web esterno  1.00 -> slot esterno =  9.50 mm
+  slot (80 nastri)  4.45 mm
+     -> R_core (CENTROIDE) = 7.276 mm   <<< DERIVATO dalla sezione
+        r0 (dimensione)    = 2.380 mm   (dalla sezione dello stack)
+        r_near (bordo int) = 5.052 mm   (per il margine)
+  web interno  1.00 -> canale He    =  4.05 mm (diam 8.10 mm)
+
+--- 5.3 Verifiche geometriche ---
+  fit angolare: arco/slot 7.62 mm - slot 4.00 mm = web 3.62 mm  [OK]
+  r0/sep = 0.327 (errore >=0.5, warning >0.4)                    [OK]
+  r_near = 5.05 mm > 0                                          [OK]
+
+--- 5.4 Aree e perimetri (per lo Step 7) ---
+  regione         [mm^2]   [%sez]
+  canale He        51.58     10.5
+  void slot         0.00      0.0
+  He TOTALE        51.58     10.5
+  stack SC        106.75     21.7
+  former Cu       188.03     38.3
+  jacket SS       144.51     29.4
+  D_h = 8.104 mm (= diametro del canale, unica regione di elio)
+  P_bagnato = 25.46 mm (solo parete del canale)
+  P_stack-former = 101.38 mm (contatto SOLIDO-SOLIDO, non bagnato)
+
+--- 5.5 Idraulica preliminare ---
+  mdot = 15.0 g/s | L_DP = 51.60 m
+  v = 4.47 m/s | Re = 1.57e+06 (turbolento) | f = 0.0089
+  dp = 0.3697 bar  [OK]
+  transito He = 11.5 s (rampa 250 s -> transitorio lento)
+  NOTA: stima con rho e mu COSTANTI. Lo Step 7 rifa' il calcolo con le
+        proprieta' reali dell'He lungo il canale (rho varia di ~4x).
+
+--- 5.6 Chiusura del Loop A ---
+  R_core usato in Step 2 : 7.276 mm
+  R_core derivato qui    : 7.276 mm  (differenza 0.000 mm)
+  ==> LOOP A CHIUSO: geometria autoconsistente.
+
+--> Salvato step5_layout.mat (aree e perimetri per lo Step 7)
+
+
+########## STEP 6 - AC LOSSES ##########
+
+--- 6.2 Regime di penetrazione ---
+  Ic(T_op,B_pk) = 153.0 A -> Bc = mu0*Ic/(pi*w) = 0.0153 T
+  escursione = 15.07 T -> rapporto = 985  [PENETRAZIONE COMPLETA: asintoto valido]
+  regime di penetrazione parziale (B < 10*Bc) per lambda < 0.0102,
+    cioe' il primo 1.0% della rampa (in campo/tempo, rampa lineare)
+    -> sotto il 5%: trascurabile, l'asintoto di piena penetrazione usato
+       in 6.3/6.3c resta valido per la quasi totalita' della rampa
+
+--- 6.3 Isteresi ---
+  Ic locale nastro: 146.8 ... 472.7 A | dB_perp/dt: 0.0000 ... 0.0546 T/s
+  d_eff = 4.0 mm (larghezza del nastro, campo perpendicolare)
+  P_isteresi per strand: max 0.5619 W/m
+  fattore temporale isteresi (media rampa / campo finale), nodo di picco: 2.03
+
+--- 6.4 Isteresi di trasporto (Norris) ---
+  F = I_tape/Ic: 0.220 ... 0.710
+  P_trasporto per strand: max 0.000149 W/m (0.03 % dell'isteresi)
+
+--- 6.5 Accoppiamento inter-strand ---
+  MR(B) da Kohler [Kohler approx., arXiv:1108.1643 eq.(5)]
+    verifica contro i valori della fonte: scarto massimo 2.4% OK
+  geomFac = 3.054 CALCOLATO sulla sezione (griglia 201x201, 0.4 s)
+    frazione di rame nel disco del former 0.54 -> il resto e' allungamento
+    del percorso attorno agli slot e al canale
+    [diagnostica] percorso fra due strand ADIACENTI: fattore 1.06
+    fra slot vicini il rame passa quasi dritto; il valore usato in
+    rho_eff resta quello omogeneizzato
+    validazione su disco di rame pieno: 1.0000 (atteso 1) OK
+  l_p locale: 516 mm (turn interno) ... 714 mm (turn esterno), contro
+  effetto di l_p(s) sull'accoppiamento, al turn esterno: fattore 1.86
+  rho_eff = 2.82e-09 Ohm*m (contatto METALLICO col former, per quench protection)
+    = rho_Cu(RRR 100) x MR(B) x 3.054 (percorso attorno agli slot)
+    MR(B) da 1.57 al turn esterno a 5.95 al picco: NON e' piu' un numero
+    unico, e' valutata sul campo di ogni nodo (Kohler, ramo lineare)
+    -> rho_eff da 7.42e-10 a 2.82e-09 Ohm*m lungo il conduttore
+  l_p = 0.524 m | n = 2 -> tau = 10.432 s (MASSIMO lungo il conduttore,
+    che cade dove rho_eff e' minima, cioe' al campo MINIMO; al picco di
+    campo tau vale 1.505 s. Il quasi-stazionario si verifica sul massimo.
+  P_accoppiamento per strand: max 0.1846 W/m
+  tau/t_rampa = 0.0417  [quasi-stazionario OK]
+  sensibilita' a rho_eff (per strand, sul turn a campo massimo):
+    rho_eff = 2.8e-09 -> tau =    1.549 s -> P = 0.1831 W/m
+    rho_eff = 1.0e-08 -> tau =    0.436 s -> P = 0.0516 W/m
+    rho_eff = 1.0e-07 -> tau =    0.044 s -> P = 0.0052 W/m
+    rho_eff = 1.0e-06 -> tau =    0.004 s -> P = 0.0005 W/m
+  fattore temporale accoppiamento (media rampa / campo finale), nodo di picco: 2.21
+  tau massimo su TUTTA la rampa = 17.159 s
+  tau_max/t_rampa = 0.0686  [quasi-stazionario OK su tutta la rampa]
+  fattore sull'energia AC al SOLO nodo di picco (diagnostica locale): 2.20
+      (energia con Q(s) congelato al campo finale: 0.05 kJ; con Q(s,t): 0.10 kJ)
+      il fattore sull'INTERO DP, quello da citare, e' stampato in 7.3
+
+--- 6.6 Eddy nei metalli ---
+  rho_Cu(15T) = 9.23e-10 Ohm*m (x6.0 magnetoresistenza) | rho_SS = 5.0e-07
+  P_eddy Cu per strand: max 0.001966 W/m | SS: max 0.000000 W/m
+  -> eddy SS < 1% del termine dominante: trascurabile (VERIFICATO, non assunto)
+  ripartizione NEL NODO di picco (s = 26.2 m): isteresi 76.3 %, accoppiamento 23.7 %
+
+  --- Come gestire l'accoppiamento: due leve, in ordine di costo ---
+  LEVA 1, LA PORTATA. L'accoppiamento e' potenza da smaltire, e il budget
+  di elio ha margine: lo Step 7 cerca la portata minima e la confronta con
+  i 15 g/s disponibili. Se ci sta, non serve toccare il cavo, ed e' la
+  soluzione piu' economica: nessuna modifica di geometria, nessun impatto
+  sulla protezione al quench, nessuna cascata sulla mesh del DAE.
+  Il verdetto lo da' lo Step 7.5, non questa sezione.
+
+  LEVA 2, IL PASSO DI TWIST (P_coup varia con l_p^2). Da usare solo se la
+  portata non basta: costa una revisione di disc.N_seg_dae e del tempo di
+  calcolo, e un twist piu stretto aumenta la deformazione dei nastri.
+  attuale: l_p = 524 mm, N_twist = 6 -> accoppiamento 33 % dell'isteresi
+    per accoppiamento <= 10 % dell'isteresi: l_p <= 289 mm -> N_twist >= 11
+    per accoppiamento <= 20 % dell'isteresi: l_p <= 409 mm -> N_twist >=  8
+    per accoppiamento <= 30 % dell'isteresi: l_p <= 500 mm -> N_twist >=  7
+  (riferimento ENEA dalle slide: passo di twist 0.5 m)
+  ATTENZIONE: alzare N_twist richiede di rivedere disc.N_seg_dae, perche'
+  la 2.1c chiede almeno 4 segmenti per periodo di twist (ora 4.0).
+
+  NOTA: che l'accoppiamento domini (24 % del totale) NON e' di per se'
+  un problema. E' la conseguenza attesa del contatto metallico voluto per
+  la protezione al quench, ed e' un problema solo se la potenza risultante
+  non e' smaltibile. Il criterio di accettazione e' quindi la portata
+  minima dello Step 7 contro i 15 g/s disponibili, non la quota di
+  accoppiamento sul totale. Il verdetto e' rimandato li'.
+  potenza media sulla rampa (Q(s,t)) = 179.5 W, contro 94.7 W al campo finale
+    fattore 1.90 | energia vera sulla rampa = 44.9 kJ
+
+--- 6.7 Totale ---
+  termine                   max [W/m]       quota
+  magnetizzazione            0.561897       75.1%
+  trasporto (Norris)         0.000149        0.0%
+  accoppiamento              0.184565       24.7%
+  eddy Cu                    0.001966        0.3%
+  eddy SS                    0.000000        0.0%
+  ------------------------------------------------
+  somma dei minori           0.002115        0.3%   <- ESCLUSI dal totale
+  -> minori sotto l'1%: esclusione VERIFICATA a questo run, non assunta
+  Q(s) di CAVO: max 3.290 W/m, medio 1.835 W/m (= P_tot/L)
+  potenza totale sul DP AL CAMPO FINALE = 94.7 W (vedi sopra per la media
+    vera sulla rampa e per l'energia, che usano P_ac_avg)
+
+  --- Bilancio termico preliminare (indicativo) ---
+  riscaldamento He stimato = P/(mdot*cp) = 2.39 K
+  T_in min (brief) = 4.5 K -> T uscita stimata = 6.89 K (T_op ammessa 16.46 K)
+
+--- 6.8 Assunzioni dello Step 6 ---
+  A6.1 Scenario CHIUSO: una sola rampa monotona 0 -> 50 kA da stato vergine,
+       nessun ciclo. Le formule adottate danno direttamente la POTENZA in
+       funzione di dB/dt, quindi non serve nessuna conversione da energia
+       per ciclo (vedi 6.1).
+  A6.2 Formule chiuse e non DAE: con G = 0 il DAE non puo' dare accoppiamento
+       ne' isteresi intra-nastro (arco lumped, nessun profilo di penetrazione).
+  A6.3 Stato critico (Bean) = limite n->infinito della power law: le formule di
+       isteresi NON usano n. n(T,B) resta usato solo nella R(i,B,T) dello Step 4.
+  A6.4 Nastri dello stack trattati come INDIPENDENTI (perdita singola x 80).
+       In uno stack reale la schermatura reciproca RIDUCE la magnetizzazione:
+       questa stima e' quindi CONSERVATIVA.
+  A6.5 Solo B_perp genera magnetizzazione; B_par trascurata (offre al flusso lo
+       spessore del film, 2.5 um, non la larghezza).
+  A6.6 rho_eff = 2.8e-09 Ohm*m, valore METALLICO: conseguenza della scelta di
+       mettere lo stack a contatto col rame per la protezione al quench.
+       Non e' un'assunzione libera ma il caso peggiore per le perdite,
+       calcolato dai dati del Data Book. Il fattore geometrico (x3.054) e'
+       CALCOLATO sulla sezione (6.5) e la magnetoresistenza e' MR(B) da
+       Kohler, quindi nessuno dei due e' piu' assunto.
+  A6.7 n = 2, fattore di forma per campo trasverso. Con n = 2 la formula
+       coincide con quella classica dell'accoppiamento.
+  A6.8 d_eff = 4.0 mm = larghezza del nastro (campo perpendicolare). Con
+       campo parallelo si userebbe lo spessore e il risultato cadrebbe di
+       tre ordini di grandezza: la scelta va dichiarata, non sottintesa.
+  A6.7b Magnetoresistenza Cu: MR(B) da Kohler [arXiv:1108.1643 eq.(5)],
+       x5.95 al picco di campo, x1.57 al turn esterno.
+  A6.8 Equiripartizione I/6 per slot: dimostrata nello Step 4 (twist commensurato).
+  A6.9 Asintoto di penetrazione completa verificato in 6.2 (rapporto 985 >> 10).
+
+--> Salvato step6_aclosses.mat (Q(s) e Q(s,t) sorgente per lo Step 7)
+
+
+########## STEP 7 - COOLING NEEDS (GANDALF RIDOTTO / SLOW TRANSIENT) ##########
+
+--- 7.1 Modello e scale temporali ---
+  L_DP = 51.60 m | due rami da 25.80 m | ingresso He a s = L/2
+  A_He = 51.58 mm^2 | D_h = 8.104 mm | P_wet = 25.46 mm
+  T_in base = 4.50 K | p_out riferimento = 10.0 bar | mdot_max = 15.0 g/s
+  t_ac = L_ramo/c = 0.0930 s | t_ramp = 250 s | rapporto = 3.722e-04
+  tempo di transito a mdot_max = 26.2 s
+  -> pressione/velocita' quasi-stazionarie; energia pienamente transitoria.
+  contatto stack-former: R_contact = 0 | h_eq rappresentativo = 42787 W/m^2/K
+
+--- 7.2 Sorgenti termiche ---
+  al campo finale: isteresi 62.8 W | coupling 31.8 W | totale 94.7 W
+  energia integrata sulla rampa = 44.88 kJ (Step 6: 44.88 kJ)
+  errore di ricostruzione Q(s,t) = 2.89e-16
+
+--- 7.3 Current sharing per il termico ---
+  T_cs nativa: 20.00 ... 47.74 K | punti certificati 188/449
+  Il profilo di pieno campo e' usato in ogni istante: scelta conservativa.
+
+--- 7.4 Studio di convergenza spaziale della soluzione ---
+  dt mantenuto fisso = 0.625 s
+  dx testati [m]: 1.613 0.9556 0.9214 0.5609 0.516 0.4962 0.3308 0.3266 0.2932 0.2132 0.1969 0.1675 0.1387 0.1162 0.09556 0.09021 0.0688 0.0589 0.05432 0.04076 0.03834 0.0309 0.025 0.02411 0.01758 0.01427 0.01 0.008448 0.005 
+  riferimento: Nx=10321 | dx_ref=0.00500 m | mdot=4.0968 g/s
+  Nx=   33 | dx= 1.61252 m -> errore rel.=1.4564e-01 | margine=7.4536 K | T_sc,max=13.619 K
+  Nx=   55 | dx= 0.95557 m -> errore rel.=8.4855e-02 | margine=6.4230 K | T_sc,max=14.630 K
+  Nx=   57 | dx= 0.92144 m -> errore rel.=9.3618e-02 | margine=6.4711 K | T_sc,max=14.410 K
+  Nx=   93 | dx= 0.56088 m -> errore rel.=5.5527e-02 | margine=5.8258 K | T_sc,max=15.096 K
+  Nx=  101 | dx= 0.51601 m -> errore rel.=5.2111e-02 | margine=5.8061 K | T_sc,max=15.151 K
+  Nx=  105 | dx= 0.49616 m -> errore rel.=5.0161e-02 | margine=5.7966 K | T_sc,max=15.187 K
+  Nx=  157 | dx= 0.33077 m -> errore rel.=3.4978e-02 | margine=5.5653 K | T_sc,max=15.434 K
+  Nx=  159 | dx= 0.32659 m -> errore rel.=3.4960e-02 | margine=5.6129 K | T_sc,max=15.435 K
+  Nx=  177 | dx= 0.29318 m -> errore rel.=3.1021e-02 | margine=5.5427 K | T_sc,max=15.500 K
+  Nx=  243 | dx= 0.21323 m -> errore rel.=2.3857e-02 | margine=5.4123 K | T_sc,max=15.616 K
+  Nx=  263 | dx= 0.19695 m -> errore rel.=2.1971e-02 | margine=5.3415 K | T_sc,max=15.647 K
+  Nx=  309 | dx= 0.16753 m -> errore rel.=1.8501e-02 | margine=5.3160 K | T_sc,max=15.701 K
+  Nx=  373 | dx= 0.13871 m -> errore rel.=1.5381e-02 | margine=5.2358 K | T_sc,max=15.751 K
+  Nx=  445 | dx= 0.11622 m -> errore rel.=1.2976e-02 | margine=5.2214 K | T_sc,max=15.789 K
+  Nx=  541 | dx= 0.09556 m -> errore rel.=1.0735e-02 | margine=5.1869 K | T_sc,max=15.824 K
+  Nx=  573 | dx= 0.09021 m -> errore rel.=1.0034e-02 | margine=5.1660 K | T_sc,max=15.835 K
+  Nx=  751 | dx= 0.06880 m -> errore rel.=7.6502e-03 | margine=5.1134 K | T_sc,max=15.872 K
+  Nx=  877 | dx= 0.05890 m -> errore rel.=6.4567e-03 | margine=5.1010 K | T_sc,max=15.891 K
+  Nx=  951 | dx= 0.05432 m -> errore rel.=5.9218e-03 | margine=5.0952 K | T_sc,max=15.899 K
+  Nx= 1267 | dx= 0.04076 m -> errore rel.=4.3324e-03 | margine=5.0694 K | T_sc,max=15.924 K
+  Nx= 1347 | dx= 0.03834 m -> errore rel.=4.0181e-03 | margine=5.0615 K | T_sc,max=15.929 K
+  Nx= 1671 | dx= 0.03090 m -> errore rel.=3.1394e-03 | margine=5.0497 K | T_sc,max=15.942 K
+  Nx= 2065 | dx= 0.02500 m -> errore rel.=2.4326e-03 | margine=5.0402 K | T_sc,max=15.953 K
+  Nx= 2141 | dx= 0.02411 m -> errore rel.=2.3230e-03 | margine=5.0359 K | T_sc,max=15.955 K
+  Nx= 2937 | dx= 0.01758 m -> errore rel.=1.5373e-03 | margine=5.0273 K | T_sc,max=15.967 K
+  Nx= 3617 | dx= 0.01427 m -> errore rel.=1.1332e-03 | margine=5.0205 K | T_sc,max=15.974 K
+  Nx= 5161 | dx= 0.01000 m -> errore rel.=6.1289e-04 | margine=5.0119 K | T_sc,max=15.982 K
+  Nx= 6109 | dx= 0.00845 m -> errore rel.=4.2260e-04 | margine=5.0085 K | T_sc,max=15.985 K
+  errore penultimo livello = 4.2260e-04 (0.042 %)
+  ordine osservato log-log = 1.058
+  -> CONVERGENZA SPAZIALE ACCETTATA: errore < 1 % rispetto al riferimento.
+
+  RISULTATO DI PROGETTO SULLA GRIGLIA DI RIFERIMENTO
+  Nx=10321 | dx=0.00500 m | dt=0.625 s
+  mdot minima = 4.097 g/s su 15.0 g/s disponibili
+  margine minimo = 5.001 K a s = 11.77 m
+  massimi spazio-temporali: T_sc=15.991 K | T_Cu=15.991 K | T_He=15.924 K
+  dp ramo A/B = 0.0098 / 0.0098 bar | p_in,max = 10.010 bar
+
+--- 7.5 Frontiera operativa T_in,max(mdot) ---
+  griglia frontiera: Nx=6109, dt=0.625 s
+  limite termico superiore preliminare: T_in <= min(T_cs)-5 K = 15.00 K
+  mdot= 4.097 g/s -> T_in,max= 4.510 K | margine= 5.003 K | p_in=10.010 bar
+  mdot= 5.000 g/s -> T_in,max= 6.530 K | margine= 5.005 K | p_in=10.015 bar
+  mdot= 7.500 g/s -> T_in,max= 8.602 K | margine= 5.013 K | p_in=10.033 bar
+  mdot=10.000 g/s -> T_in,max= 9.740 K | margine= 5.002 K | p_in=10.058 bar
+  mdot=12.500 g/s -> T_in,max=10.540 K | margine= 5.011 K | p_in=10.089 bar
+  mdot=15.000 g/s -> T_in,max=11.145 K | margine= 5.003 K | p_in=10.126 bar
+  verifica FINE a 15 g/s: T_in,max = 11.145 K | margine = 5.001 K | p_in = 10.126 bar
+  -> la curva rappresenta una frontiera di progetto, non un unico optimum economico.
+
+--- 7.6 Chiusura del Loop B ---
+  T_op usata a monte per le perdite = 16.460 K
+  T_sc massima al punto base dello Step 7 = 15.991 K
+  -> LOOP B CHIUSO: T_sc,max <= T_op. L'assunzione a monte era conservativa.
+  anche il punto caldo della frontiera a 15 g/s resta sotto T_op (15.410 <= 16.460 K).
+
+--- 7.7 Verifiche idrauliche ---
+  punto base: p_out=10.000 bar | p_in,max=10.010 bar | dp=0.0098 bar
+  Re = 6.94e+04 ... 7.51e+04 | h_He = 364 ... 422 W/m^2/K
+  v = 0.268 ... 0.281 m/s | tempo di transito = 95.8 s
+  squilibrio dp fra i rami = 0.004 % -> correzione stimata al 50/50 = 0.002 %
+  dp/p_ref = 0.0979 % al punto base
+  punto frontiera a 15 g/s: p_in = 10.126 bar
+  mappa 2D: T = 6.846 ... 6.868 K nella sezione scelta
+
+--> Salvato step7_cooling.mat
+
+
+=========================================================
+ RIEPILOGO DEL DESIGN (Step 1-7)
+=========================================================
+  Solenoide : 29 DP x 7 turn radiali, R_in = 0.50 m, H = 1.450 m / 1.50 m
+  Cavo      : D = 25 mm, 6 slot, 80 nastri/slot, twist 6 giri/turn
+  Sezione   : canale He 8.10 mm, D_h 8.104 mm, jacket SS 2.0 mm
+  Correnti  : 50 kA -> 8333 A/slot -> 104.2 A/nastro
+  Campo     : B_pk = 15.07 T (target 15.0 T, scarto +0.50 %)
+  DAE       : scarto dall'equiripartizione = 6.51e-01 %
+  AC losses : 179.5 W (media rampa) / 94.7 W (campo finale) sul DP, 3.29 W/m
+              di picco, 44.9 kJ sulla rampa (Q(s,t), non congelata)
+  RAFFREDD. : mdot minima = 4.097 g/s su 15.0 disponibili (27 %)
+              griglia finale Nx=10321, dt=0.625 s | convergenza: OK
+              T_in = 4.50 K, p_in = 10.010 bar, dp = 0.0098 bar
+              massimi spazio-temporali: T_sc 15.99 K | T_Cu 15.99 K | T_He 15.92 K
+              MARGINE MINIMO 5.001 K (richiesto 5 K)
+              profili a t_end: stack 4.50...5.17 K | former 4.50...5.17 K | He 4.50...5.16 K
+  FRONTIERA : a 15 g/s si puo' arrivare a T_in = 11.14 K mantenendo 5 K di margine
+---------------------------------------------------------
+  FONTI E ASSUNZIONI PRINCIPALI
+  Materiali solidi:
+    Cu OFHC: cp e k da correlazioni NIST; RRR = 100.
+    SS304: cp e k da correlazioni NIST.
+    Hastelloy C-276: cp da Lu, Choi, Zhou (2008); sotto 10 K
+      si usa il tratto misurato approssimato linearmente.
+    k dell'Hastelloy: NIST Inconel 718 come surrogato Ni-base.
+  Elio:
+    proprieta' real-fluid da tabella embedded in funzione di T e p.
+  Step 7:
+    modello GANDALF ridotto slow-transient: energia transitoria di
+    stack/former/jacket/He; pressione e velocita' quasi-stazionarie.
+    contatto termico stack-former ideale: R_contact = 0.
+    portata divisa nominalmente 50/50 fra i due rami e verificata tramite dp.
+    criterio base: portata MINIMA con margine >= 5 K e mdot <= 15.0 g/s.
+    la portata minima e' verificata con convergenza spaziale log-log su dx, a dt fisso.
+    e' inoltre costruita la frontiera T_in,max(mdot) nel range del brief.
+    nessun requisito su h_contact viene ricavato dal surplus di margine.
+  Limiti dichiarati:
+    proprieta' He valutate alla pressione di riferimento se dp/p e' piccolo;
+    Ag approssimato come Cu e REBCO/buffer come substrato nello stack;
+    T_cs puo' essere un limite inferiore dove i dati non consentono una radice.
+---------------------------------------------------------
+  IL COMPROMESSO CENTRALE DEL PROGETTO:
+   Lo stack e' assunto elettricamente ben accoppiato al rame nel worst case di coupling.
+   Questo rende rho_eff metallica e l'accoppiamento il termine dominante
+   (24 % delle perdite). NON e' un difetto: e' potenza da smaltire, e il
+   criterio di accettazione e' la PORTATA, non la quota di accoppiamento.
+   Verdetto: 4.10 g/s minimi su 15 disponibili (27 % del budget).
+   -> ci sta con margine: NON serve twistare piu' stretto, il cavo resta
+      com'e' e la protezione al quench e' preservata.
+=========================================================
+
+=========================================================
+ PROFILING - dove se ne va il tempo
+=========================================================
+  blocco                                         tempo [s]   quota
+  Step 7    convergenza + frontiera operativa      75723.7   98.8%
+  Step 4.2  matrice induttanze L (Neumann)           684.9    0.9%
+  Step 4.4  integrazione temporale DAE               195.2    0.3%
+  Step 6    perdite AC (Ic locale su ogni nodo)        7.9    0.0%
+  Step 3.3  T_cs per bisezione su ogni nodo            3.8    0.0%
+  Step 2.3  scansione N_turn (Biot-Savart)             3.4    0.0%
+  Step 3.1  mappa di campo sul DP (macro+mutuo)        3.2    0.0%
+  Step 4.6  controprova (strand perturbati)            0.8    0.0%
+  Step 3.3b profilo di Ic sul DP                       0.3    0.0%
+  (residuo: grafici, stampe, blocchi leggeri)          8.8    0.0%
+  ---------------------------------------------------------
+  TOTALE                                           76632.0
+=========================================================
+>> 
